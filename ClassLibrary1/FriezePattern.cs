@@ -1,10 +1,21 @@
 ﻿using System;
 using System.Collections;
 namespace FriezeGenerator {
+
+    public enum Stagger
+    {
+        RIGHT,
+        LEFT,
+        NONE
+    }
     public class CoxeterConwayFunc
     {
         int[] GenerateSequence(int n)
         {
+            if(n < 3)
+            {
+                return null;
+            }
             int[] seq = new int[n];
             for(int i = 0; i<n; i++)
             {
@@ -14,12 +25,16 @@ namespace FriezeGenerator {
 
             GenerateHelper(seq,output);
             int[] final = new int[n];
-            for (int[] x : output)
+            foreach(int[] x in output)
             {
                 for(int i = 0; i<x.Length; i++)
                 {
                     final[x[i]] += 1;
                 }
+            }
+            for(int i = 0; i<n; i++)
+            {
+                final[i] -= 1;
             }
 
             return final;
@@ -63,7 +78,7 @@ namespace FriezeGenerator {
             }
             for(int j = next; j!=start; j++)
             {
-                poly2[Math.Abs(j-next)]
+                poly2[Math.Abs(j - next)] = seq[j];
                 if(j == seq.Length - 1)
                 {
                     j = -1;
@@ -81,17 +96,68 @@ namespace FriezeGenerator {
     {
         public ArrayList Run(int[] seq)
         {
+            int patternLength = getPatternSize(seq);
             ArrayList toFill = new ArrayList();
-            GenerateNextRow(Array.Fill<int>(new int[seq.Length-1], 1), seq, toFill);
+            int[] startingLine = new int[seq.Length + 1];
+            Array.Fill(startingLine, 1);
+
+            GenerateNextRow(startingLine, seq, toFill, Stagger.NONE);
+            return toFill;
         }
 
-        protected ArrayList GenerateNextRow(int[] prev, int[] seq, ArrayList toFill)
+        protected ArrayList GenerateNextRow(int[] prev, int[] seq, ArrayList toFill, Stagger s)
         {
-            int[] newRow = new int[seq.Length];
-            for(int j = 0; j<prev.Length; j++){
-                newRow[j] = (1 + seq[j] * seq[j + 1]) / prev[j];
+            int[] newRow = new int[prev.Length];
+            for (int j = 0; j < prev.Length; j++) {
+                newRow[j] = (seq[j] * seq[j + 1] - 1) / prev[j];
             }
+
+            return null;
         }
+
+        protected ArrayList findFactors(int num)
+        {
+            ArrayList toFill = new ArrayList();
+            double bound = Math.Sqrt(num);
+            for (int i = 2; i < bound; i++)
+            {
+                if (num % i == 0)
+                {
+                    toFill.Add(i);
+                }
+            }
+            return toFill;
+        }
+        protected int getPatternSize(int[] seq)
+        {
+            int patternLength = seq.Length;
+            if(seq.Length %2 != 0)
+            {
+                return patternLength;
+            }
+            ArrayList patternChecker = findFactors(seq.Length);
+            for (int i = 0; i < patternChecker.Count; i++)
+            {
+                int factor = (int)patternChecker[i];
+                for (int j = 0; j < seq.Length / factor; j++)
+                {
+                    if (seq[j] != seq[j + factor])
+                    {
+                        factor = -1;
+                        break;
+                    }
+
+                }
+                if (factor == -1)
+                {
+                    continue;
+                }
+                patternLength = factor;
+                break;
+            }
+            return patternLength;
+        }
+        
 
     }
 }
