@@ -2,12 +2,7 @@
 using System.Collections;
 namespace FriezeGenerator {
 
-    public enum Stagger
-    {
-        RIGHT,
-        LEFT,
-        NONE
-    }
+   
     public class CoxeterConwayFunc
     {
         int[] GenerateSequence(int n)
@@ -96,68 +91,59 @@ namespace FriezeGenerator {
     {
         public ArrayList Run(int[] seq)
         {
-            int patternLength = getPatternSize(seq);
             ArrayList toFill = new ArrayList();
             int[] startingLine = new int[seq.Length + 1];
             Array.Fill(startingLine, 1);
+            int[] fixedSeq = new int[seq.Length + 1];
+            fixedSeq = seq;
+            fixedSeq[fixedSeq.Length - 1] = seq[0];
 
-            GenerateNextRow(startingLine, seq, toFill, Stagger.NONE);
+            GenerateNextRow(startingLine, fixedSeq, toFill, true);
             return toFill;
         }
 
-        protected ArrayList GenerateNextRow(int[] prev, int[] seq, ArrayList toFill, Stagger s)
+        protected ArrayList GenerateNextRow(int[] prev, int[] seq, ArrayList toFill, Boolean stagger)
         {
+            if (CycleCompleted(seq))
+            {
+                return toFill;
+            }
             int[] newRow = new int[prev.Length];
-            for (int j = 0; j < prev.Length; j++) {
-                newRow[j] = (seq[j] * seq[j + 1] - 1) / prev[j];
-            }
-
-            return null;
-        }
-
-        protected ArrayList findFactors(int num)
-        {
-            ArrayList toFill = new ArrayList();
-            double bound = Math.Sqrt(num);
-            for (int i = 2; i < bound; i++)
+            if (stagger)
             {
-                if (num % i == 0)
+                for (int j = 0; j < prev.Length - 1; j++)
                 {
-                    toFill.Add(i);
+                    newRow[j] = (seq[j] * seq[j + 1] - 1) / prev[j];
                 }
+                newRow[newRow.Length - 1] = newRow[0];
             }
+            else
+            {
+                for (int j = 1; j < prev.Length; j++)
+                {
+                    newRow[j] = (seq[j - 1] * seq[j] - 1) / prev[j];
+                }
+                newRow[0] = newRow[newRow.Length - 1];
+            }
+            toFill.Add(newRow);
+            GenerateNextRow(seq, newRow, toFill, !stagger);
+
             return toFill;
         }
-        protected int getPatternSize(int[] seq)
+
+
+
+        protected Boolean CycleCompleted(int[] seq)
         {
-            int patternLength = seq.Length;
-            if(seq.Length %2 != 0)
+            for (int i = 0; i < seq.Length; i++)
             {
-                return patternLength;
-            }
-            ArrayList patternChecker = findFactors(seq.Length);
-            for (int i = 0; i < patternChecker.Count; i++)
-            {
-                int factor = (int)patternChecker[i];
-                for (int j = 0; j < seq.Length / factor; j++)
+                if (seq[i] != 1)
                 {
-                    if (seq[j] != seq[j + factor])
-                    {
-                        factor = -1;
-                        break;
-                    }
-
+                    return false;
                 }
-                if (factor == -1)
-                {
-                    continue;
-                }
-                patternLength = factor;
-                break;
             }
-            return patternLength;
+            return true;
         }
-        
-
     }
+        
 }
