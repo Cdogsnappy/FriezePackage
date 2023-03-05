@@ -5,7 +5,7 @@ namespace FriezeGenerator {
    
     public class CoxeterConwayFunc
     {
-        int[] GenerateSequence(int n)
+        internal static int[] GenerateSequence(int n)
         {
             if(n < 3)
             {
@@ -34,7 +34,7 @@ namespace FriezeGenerator {
 
             return final;
         }
-        ArrayList GenerateHelper(int[] seq, ArrayList toFill)
+        internal static ArrayList GenerateHelper(int[] seq, ArrayList toFill)
         {
             if(seq.Length == 3)
             {
@@ -89,7 +89,7 @@ namespace FriezeGenerator {
     }
     public class FriezeFunc
     {
-        public ArrayList Run(int[] seq)
+        internal static ArrayList Run(int[] seq)
         {
             ArrayList toFill = new ArrayList();
             int[] startingLine = new int[seq.Length + 1];
@@ -102,7 +102,7 @@ namespace FriezeGenerator {
             return toFill;
         }
 
-        protected ArrayList GenerateNextRow(int[] prev, int[] seq, ArrayList toFill, Boolean stagger)
+        internal static ArrayList GenerateNextRow(int[] prev, int[] seq, ArrayList toFill, Boolean stagger)
         {
             if (CycleCompleted(seq))
             {
@@ -133,7 +133,7 @@ namespace FriezeGenerator {
 
 
 
-        protected Boolean CycleCompleted(int[] seq)
+        internal static Boolean CycleCompleted(int[] seq)
         {
             for (int i = 0; i < seq.Length; i++)
             {
@@ -145,5 +145,32 @@ namespace FriezeGenerator {
             return true;
         }
     }
+    public class Tests
+    {
+        static String F = "FAILED";
+        static String P = "PASSED";
         
+        static void main(String[] args){
+            Console.WriteLine(Test1());
+        }
+
+        private static String Test1()
+        {
+            int[] x;
+            try
+            {
+                x = CoxeterConwayFunc.GenerateSequence(3);
+            }
+            catch (Exception ex)
+            {
+                return F;
+            }
+            if(x.Length != 3)
+            {
+                return F;
+            }
+            return P;
+        }
+    }
+
 }
